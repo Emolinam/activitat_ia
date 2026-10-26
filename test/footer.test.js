@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const base = '/home/runner/work/activitat_ia/activitat_ia';
+const base = 'C:/Users/ies/Desktop/activitat_ia';
 
 test('index inclou el footer amb text i enllaç de contacte', async () => {
   const html = await readFile(`${base}/public/index.html`, 'utf8');
