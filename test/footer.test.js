@@ -8,7 +8,7 @@ test('index inclou el footer amb text i enllaç de contacte', async () => {
   const html = await readFile(`${base}/public/index.html`, 'utf8');
   assert.match(html, /<footer>/);
   assert.match(html, /©\s*<span id="any-actual"><\/span>\s*Botiga Copilot/);
-  assert.match(html, /href="mailto:contacte@botiga\.example\.com"/);
+  assert.match(html, /<a href="mailto:contacte@botiga\.example\.com">Contacta'ns<\/a>/);
 });
 
 test('l’any del footer es calcula amb JavaScript', async () => {
@@ -22,4 +22,5 @@ test('els estils del footer estan a styles.css amb variables de :root', async ()
   assert.match(css, /footer\s*\{/);
   assert.match(css, /var\(--color-text\)/);
   assert.match(css, /var\(--color-principal\)/);
+  assert.match(css, /text-align:\s*center/);
 });

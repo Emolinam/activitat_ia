@@ -60,6 +60,7 @@ footer {
   background: white;
   color: var(--color-text);
   border-top: 2px solid var(--color-principal);
+  text-align: center;
 }
 
 footer p {
