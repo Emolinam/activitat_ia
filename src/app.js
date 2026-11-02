@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { routerProductes } from './routes/productes.js';
+import { routerCategories } from './routes/categories.js';
 import { routerRessenyes } from './routes/ressenyes.js';
 import { routerCarret } from './routes/carret.js';
 
@@ -18,6 +19,7 @@ export function crearApp(db) {
   app.use(express.static(path.join(directori, '..', 'public')));
 
   app.use('/api/productes', routerProductes(db));
+  app.use('/api/categories', routerCategories(db));
   app.use('/api/ressenyes', routerRessenyes(db));
   app.use('/api/carret', routerCarret());
 

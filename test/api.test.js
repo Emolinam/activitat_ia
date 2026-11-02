@@ -1,5 +1,6 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { DatabaseSync } from 'node:sqlite';
 import { crearApp } from '../src/app.js';
 import { crearBaseDades } from '../src/db.js';
 
@@ -47,4 +48,42 @@ test('GET /api/productes inclou mitjana null i numRessenyes 0 per productes sens
 test('GET /api/productes/:id retorna 404 si no existeix', async () => {
   const resposta = await fetch(`${base}/api/productes/999`);
   assert.equal(resposta.status, 404);
+});
+
+test('GET /api/categories retorna les categories amb nombre de productes', async () => {
+  const resposta = await fetch(`${base}/api/categories`);
+  assert.equal(resposta.status, 200);
+
+  const categories = await resposta.json();
+  assert.deepEqual(categories, [
+    { categoria: 'casa', numProductes: 2 },
+    { categoria: 'papereria', numProductes: 2 },
+    { categoria: 'roba', numProductes: 2 },
+  ]);
+});
+
+test('GET /api/categories retorna un array buit si no hi ha categories', async () => {
+  const baseDadesBuida = new DatabaseSync(':memory:');
+  baseDadesBuida.exec(`
+    CREATE TABLE productes (
+      id INTEGER PRIMARY KEY,
+      nom TEXT NOT NULL,
+      descripcio TEXT,
+      categoria TEXT NOT NULL,
+      preu REAL NOT NULL
+    );
+  `);
+
+  const appBuida = crearApp(baseDadesBuida);
+  const servidorBuida = appBuida.listen(0);
+  const port = servidorBuida.address().port;
+
+  try {
+    const resposta = await fetch(`http://localhost:${port}/api/categories`);
+    assert.equal(resposta.status, 200);
+    const categories = await resposta.json();
+    assert.deepEqual(categories, []);
+  } finally {
+    servidorBuida.close();
+  }
 });
