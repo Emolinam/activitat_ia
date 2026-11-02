@@ -26,6 +26,24 @@ test('GET /api/productes?categoria=roba filtra per categoria', async () => {
   assert.ok(productes.every((p) => p.categoria === 'roba'));
 });
 
+test('GET /api/productes inclou mitjana i numRessenyes per productes amb ressenyes', async () => {
+  const resposta = await fetch(`${base}/api/productes`);
+  const productes = await resposta.json();
+  const producte = productes.find((p) => p.id === 1);
+
+  assert.equal(producte.mitjana, 4);
+  assert.equal(producte.numRessenyes, 2);
+});
+
+test('GET /api/productes inclou mitjana null i numRessenyes 0 per productes sense ressenyes', async () => {
+  const resposta = await fetch(`${base}/api/productes`);
+  const productes = await resposta.json();
+  const producte = productes.find((p) => p.id === 2);
+
+  assert.equal(producte.mitjana, null);
+  assert.equal(producte.numRessenyes, 0);
+});
+
 test('GET /api/productes/:id retorna 404 si no existeix', async () => {
   const resposta = await fetch(`${base}/api/productes/999`);
   assert.equal(resposta.status, 404);
