@@ -41,13 +41,17 @@ async function actualitzarCarret() {
   document.querySelector('#carret').innerHTML = carret
     .map((i) => `<li>${i.nom} × ${i.quantitat}</li>`)
     .join('');
+
   const resposta = await fetch('/api/carret/total', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ items: carret, descompte: 10 }),
   });
-  const { total } = await resposta.json();
-  document.querySelector('#total').textContent = `${total.toFixed(2)} €`;
+
+  const { subtotal, enviament, total } = await resposta.json();
+  document.querySelector('#subtotal').textContent = `${Number(subtotal).toFixed(2)} €`;
+  document.querySelector('#enviament').textContent = `${Number(enviament).toFixed(2)} €`;
+  document.querySelector('#total').textContent = `${Number(total).toFixed(2)} €`;
 }
 
 let producteActual = null;

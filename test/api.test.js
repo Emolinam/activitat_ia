@@ -87,3 +87,24 @@ test('GET /api/categories retorna un array buit si no hi ha categories', async (
     servidorBuida.close();
   }
 });
+
+test('POST /api/carret/total retorna subtotal, enviament i total', async () => {
+  const resposta = await fetch(`${base}/api/carret/total`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      items: [
+        { preu: 20, quantitat: 2, pes: 0.5 },
+        { preu: 5, quantitat: 1, pes: 0.4 },
+      ],
+      descompte: 10,
+    }),
+  });
+
+  assert.equal(resposta.status, 200);
+  assert.deepEqual(await resposta.json(), {
+    subtotal: 40.5,
+    enviament: 5.9,
+    total: 46.4,
+  });
+});
