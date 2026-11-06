@@ -1,6 +1,11 @@
 import { Router } from 'express';
 import { calcularTotalCarret } from '../utils/carret.js';
 
+/**
+ * Crea el router per calcular el total d'un carret.
+ *
+ * @returns {import('express').Router} Router amb els endpoints del carret.
+ */
 export function routerCarret() {
   const router = Router();
 
