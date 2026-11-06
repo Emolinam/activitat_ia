@@ -27,6 +27,15 @@ test('GET /api/productes?categoria=roba filtra per categoria', async () => {
   assert.ok(productes.every((p) => p.categoria === 'roba'));
 });
 
+test('GET /api/productes rebutja una categoria amb injecció SQL', async () => {
+  const categoria = "' UNION SELECT id, email, contrasenya, rol, 0 FROM usuaris--";
+  const resposta = await fetch(
+    `${base}/api/productes?categoria=${encodeURIComponent(categoria)}`,
+  );
+  const productes = await resposta.json();
+  assert.deepEqual(productes, []);
+});
+
 test('GET /api/productes inclou mitjana i numRessenyes per productes amb ressenyes', async () => {
   const resposta = await fetch(`${base}/api/productes`);
   const productes = await resposta.json();
@@ -107,4 +116,60 @@ test('POST /api/carret/total retorna subtotal, enviament i total', async () => {
     enviament: 5.9,
     total: 46.4,
   });
+});
+
+test('POST /api/ressenyes rebutja un productId no enter o inexistent', async () => {
+  for (const productId of [1.5, 999]) {
+    const resposta = await fetch(`${base}/api/ressenyes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId,
+        autor: 'Marta',
+        text: 'Ressenya vàlida.',
+        puntuacio: 5,
+      }),
+    });
+
+    assert.equal(resposta.status, 400);
+    assert.equal(typeof (await resposta.json()).error, 'string');
+  }
+});
+
+test('POST /api/ressenyes rebutja autor i text buits o massa llargs', async () => {
+  const casos = [
+    { autor: '   ', text: 'Text vàlid.' },
+    { autor: 'a'.repeat(51), text: 'Text vàlid.' },
+    { autor: 'Marta', text: '   ' },
+    { autor: 'Marta', text: 'a'.repeat(501) },
+  ];
+
+  for (const dades of casos) {
+    const resposta = await fetch(`${base}/api/ressenyes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: 1, ...dades, puntuacio: 5 }),
+    });
+
+    assert.equal(resposta.status, 400);
+    assert.equal(typeof (await resposta.json()).error, 'string');
+  }
+});
+
+test('POST /api/ressenyes rebutja una puntuacio fora del rang o no enter', async () => {
+  for (const puntuacio of [0, 6, 2.5]) {
+    const resposta = await fetch(`${base}/api/ressenyes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId: 1,
+        autor: 'Marta',
+        text: 'Ressenya vàlida.',
+        puntuacio,
+      }),
+    });
+
+    assert.equal(resposta.status, 400);
+    assert.equal(typeof (await resposta.json()).error, 'string');
+  }
 });

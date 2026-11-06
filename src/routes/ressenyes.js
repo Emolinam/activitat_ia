@@ -31,12 +31,42 @@ export function routerRessenyes(db) {
    * @param {import('express').Response} res Resposta HTTP.
    */
   router.post('/', (req, res) => {
-    const { producteId, autor, text, puntuacio } = req.body;
+    const { productId, autor, text, puntuacio } = req.body;
+
+    if (!Number.isInteger(productId)) {
+      return res.status(400).json({ error: 'productId ha de ser un enter.' });
+    }
+
+    const producte = db
+      .prepare('SELECT id FROM productes WHERE id = ?')
+      .get(productId);
+    if (!producte) {
+      return res.status(400).json({ error: 'El producte indicat no existeix.' });
+    }
+
+    if (typeof autor !== 'string' || autor.trim().length === 0) {
+      return res.status(400).json({ error: "L'autor no pot estar buit." });
+    }
+    if (autor.length > 50) {
+      return res.status(400).json({ error: "L'autor no pot superar els 50 caràcters." });
+    }
+
+    if (typeof text !== 'string' || text.trim().length === 0) {
+      return res.status(400).json({ error: 'El text no pot estar buit.' });
+    }
+    if (text.length > 500) {
+      return res.status(400).json({ error: 'El text no pot superar els 500 caràcters.' });
+    }
+
+    if (!Number.isInteger(puntuacio) || puntuacio < 1 || puntuacio > 5) {
+      return res.status(400).json({ error: 'La puntuacio ha de ser un enter entre 1 i 5.' });
+    }
+
     const resultat = db
       .prepare(
         'INSERT INTO ressenyes (producte_id, autor, text, puntuacio) VALUES (?, ?, ?, ?)'
       )
-      .run(producteId, autor, text, puntuacio);
+      .run(productId, autor, text, puntuacio);
     res.status(201).json({ id: Number(resultat.lastInsertRowid) });
   });
 
